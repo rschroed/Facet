@@ -13,11 +13,41 @@ export type FacetsCanvas = {
   id: CanvasId;
   artifacts: FacetsArtifact[];
   relationships: FacetsRelationship[];
-  nodeViews?: Record<ArtifactId, FacetsNodeViewState>;
 };
 
-export type FacetsNodeViewState = {
+export type FacetsProjectFile = {
+  app: "facets";
+  schemaVersion: 1;
+  project: FacetsProject;
+  canvasView: FacetsCanvasView;
+};
+
+export type FacetsCanvasView = {
+  canvasId: CanvasId;
+  viewport: FacetsCanvasViewport;
+  nodes: Record<ArtifactId, FacetsCanvasNodeView>;
+};
+
+export type FacetsCanvasViewport = {
+  x: number;
+  y: number;
+  zoom: number;
+};
+
+export type FacetsCanvasNodeView = {
   expanded?: boolean;
+  position: FacetsCanvasNodePosition;
+  size?: FacetsCanvasNodeSize;
+};
+
+export type FacetsCanvasNodePosition = {
+  x: number;
+  y: number;
+};
+
+export type FacetsCanvasNodeSize = {
+  width: number;
+  height: number;
 };
 
 export type BriefArtifact = {

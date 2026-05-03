@@ -64,7 +64,7 @@ Local persistence should save and load Facets project data, not raw React Flow s
 
 Artifact content should remain separate from canvas rendering state. React Flow viewport and layout data may be saved alongside the artifact model, but should not become the source of truth for Brief, Direction, Prompt, or relationship content.
 
-The full local project file format remains deferred to issue #3.
+See [Local project file](local-project-file.md) for the documented `.facets.json` shape.
 
 ## V1 Boundaries
 
