@@ -17,15 +17,10 @@ type FacetsCanvas = {
   id: CanvasId;
   artifacts: FacetsArtifact[];
   relationships: FacetsRelationship[];
-  nodeViews?: Record<ArtifactId, FacetsNodeViewState>;
-};
-
-type FacetsNodeViewState = {
-  expanded?: boolean;
 };
 ```
 
-The canvas groups artifacts, relationships, and minimal node rendering state without defining the full local project file format.
+The canvas groups artifact and relationship content. Local project files store canvas rendering state separately.
 
 ## Artifacts
 
@@ -74,7 +69,7 @@ Facets artifacts and relationships are the source of truth. React Flow nodes and
 
 React Flow `node.data` can carry whatever a canvas component needs to render, but it must not become the long-term artifact store for Brief, Direction, Prompt, or relationship content.
 
-Collapsed and expanded node state is canvas rendering state, not artifact content. The initial model keeps this in `FacetsCanvas.nodeViews` so artifact content remains separate from view state.
+Collapsed and expanded node state is canvas rendering state, not artifact content. Local project files keep this state outside `FacetsProject.canvas` so artifact content remains separate from view state.
 
 ## Persistence Boundary
 
@@ -82,4 +77,4 @@ Local persistence should later save and load `FacetsProject` data, not raw React
 
 Viewport and layout data may be stored separately alongside the artifact model, but artifact content and relationships should remain independent from React Flow rendering state.
 
-The full project file format, including schema versioning, viewport/layout shape, timestamps, and save/load compatibility, remains deferred to issue #3.
+See [Local project file](local-project-file.md) for the `.facets.json` wrapper and canvas view shape. Save/load behavior remains deferred to a later issue.

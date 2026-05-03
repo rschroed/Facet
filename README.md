@@ -23,12 +23,13 @@ See:
 - [GitHub workflow](docs/github-workflow.md)
 - [Product direction](docs/product-direction.md)
 - [Artifact model](docs/artifact-model.md)
+- [Local project file](docs/local-project-file.md)
 
 ## Current Milestone
 
 The repo is being restarted from a docs-first foundation. The previous scaffold is preserved on the `archive/pre-restart-scaffold` branch.
 
-Issue #5 added the first app scaffold: a Tauri v2 + React + TypeScript shell with a full-window blank React Flow canvas. Issue #4 defines the first Facets artifact model. Product-specific node behavior starts in later issues.
+Issue #5 added the first app scaffold: a Tauri v2 + React + TypeScript shell with a full-window blank React Flow canvas. Issue #4 defined the first Facets artifact model. Issue #3 defines the local `.facets.json` file shape. Product-specific node behavior starts in later issues.
 
 ## Development
 
