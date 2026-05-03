@@ -26,3 +26,37 @@ See:
 ## Current Milestone
 
 The repo is being restarted from a docs-first foundation. The previous scaffold is preserved on the `archive/pre-restart-scaffold` branch.
+
+Issue #5 adds the first app scaffold: a Tauri v2 + React + TypeScript shell with a full-window blank React Flow canvas. Product-specific node behavior starts in later issues.
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the web app in development:
+
+```bash
+npm run dev
+```
+
+Build the web app:
+
+```bash
+npm run build
+```
+
+Run the Tauri desktop app:
+
+```bash
+npm run tauri:dev
+```
+
+Build the Tauri desktop app:
+
+```bash
+npm run tauri:build
+```
