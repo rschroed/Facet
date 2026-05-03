@@ -1,4 +1,6 @@
 import type {
+  ArtifactId,
+  FacetsCanvasView,
   FacetsArtifact,
   FacetsProjectFile,
   FacetsRelationship,
@@ -11,12 +13,20 @@ export type FacetsReactFlowGraph = {
   edges: RelationshipEdge[];
 };
 
+export type MapProjectFileToReactFlowOptions = {
+  canvasView?: FacetsCanvasView;
+  onToggleExpanded?: (artifactId: ArtifactId) => void;
+};
+
 export function mapProjectFileToReactFlow(
   projectFile: FacetsProjectFile,
+  options: MapProjectFileToReactFlowOptions = {},
 ): FacetsReactFlowGraph {
+  const canvasView = options.canvasView ?? projectFile.canvasView;
+
   return {
     nodes: projectFile.project.canvas.artifacts.map((artifact) =>
-      mapArtifactToNode(artifact, projectFile),
+      mapArtifactToNode(artifact, canvasView, options.onToggleExpanded),
     ),
     edges: projectFile.project.canvas.relationships.map(mapRelationshipToEdge),
   };
@@ -24,17 +34,23 @@ export function mapProjectFileToReactFlow(
 
 function mapArtifactToNode(
   artifact: FacetsArtifact,
-  projectFile: FacetsProjectFile,
+  canvasView: FacetsCanvasView,
+  onToggleExpanded?: (artifactId: ArtifactId) => void,
 ): ArtifactNode {
-  const nodeView = projectFile.canvasView.nodes[artifact.id];
+  const nodeView = canvasView.nodes[artifact.id];
 
   return {
     id: artifact.id,
     type: "artifact",
     position: nodeView.position,
-    data: getArtifactNodeData(artifact),
+    data: getArtifactNodeData(
+      artifact,
+      Boolean(nodeView.expanded),
+      onToggleExpanded,
+    ),
     draggable: false,
     selectable: false,
+    zIndex: 2,
     style: nodeView.size
       ? {
           width: nodeView.size.width,
@@ -44,28 +60,35 @@ function mapArtifactToNode(
   };
 }
 
-function getArtifactNodeData(artifact: FacetsArtifact): ArtifactNodeData {
+function getArtifactNodeData(
+  artifact: FacetsArtifact,
+  expanded: boolean,
+  onToggleExpanded?: (artifactId: ArtifactId) => void,
+): ArtifactNodeData {
   switch (artifact.type) {
     case "brief":
       return {
         artifact,
         typeLabel: "Brief",
         summary: artifact.brief,
-        detail: artifact.audience,
+        expanded,
+        onToggleExpanded,
       };
     case "direction":
       return {
         artifact,
         typeLabel: "Direction",
         summary: artifact.angle,
-        detail: artifact.notes,
+        expanded,
+        onToggleExpanded,
       };
     case "prompt":
       return {
         artifact,
         typeLabel: "Prompt",
         summary: artifact.summary,
-        detail: getPromptTargetLabel(artifact.target),
+        expanded,
+        onToggleExpanded,
       };
   }
 }
@@ -96,7 +119,7 @@ function getRelationshipLabel(relationship: FacetsRelationship): string {
   }
 }
 
-function getPromptTargetLabel(target: PromptTarget): string {
+export function getPromptTargetLabel(target: PromptTarget): string {
   switch (target) {
     case "chatgpt":
       return "ChatGPT";

@@ -1,11 +1,12 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { FacetsArtifact, FacetsRelationship } from "../domain";
+import type { ArtifactId, FacetsArtifact, FacetsRelationship } from "../domain";
 
 export type ArtifactNodeData = {
   artifact: FacetsArtifact;
   typeLabel: string;
   summary: string;
-  detail: string;
+  expanded: boolean;
+  onToggleExpanded?: (artifactId: ArtifactId) => void;
 };
 
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
