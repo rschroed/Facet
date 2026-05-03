@@ -31,7 +31,100 @@ body {
   background: #f6f2e8;
 }
 
+.react-flow__pane {
+  cursor: grab;
+}
+
+.react-flow__pane:active {
+  cursor: grabbing;
+}
+
 .react-flow__controls {
   border: 1px solid rgba(31, 35, 32, 0.12);
   box-shadow: 0 16px 40px rgba(54, 48, 36, 0.08);
+}
+
+.react-flow__edge-path {
+  stroke: #81786a;
+  stroke-width: 1.6;
+}
+
+.react-flow__edge-textbg {
+  fill: #f6f2e8;
+}
+
+.react-flow__edge-text {
+  fill: #5f594f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.artifact-node {
+  width: 100%;
+  min-height: 210px;
+  padding: 20px;
+  color: #24251f;
+  background: #fffdf7;
+  border: 1px solid rgba(31, 35, 32, 0.14);
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(54, 48, 36, 0.12);
+}
+
+.artifact-node--brief {
+  border-color: rgba(31, 124, 96, 0.34);
+}
+
+.artifact-node--direction {
+  border-color: rgba(88, 99, 131, 0.3);
+}
+
+.artifact-node--prompt {
+  border-color: rgba(146, 94, 55, 0.3);
+}
+
+.artifact-node__eyebrow {
+  margin-bottom: 12px;
+  color: #1f7c60;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.artifact-node--direction .artifact-node__eyebrow {
+  color: #586383;
+}
+
+.artifact-node--prompt .artifact-node__eyebrow {
+  color: #925e37;
+}
+
+.artifact-node__title {
+  margin: 0;
+  color: #1f211d;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.artifact-node__summary {
+  margin: 14px 0 0;
+  color: #4f4a42;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.artifact-node__detail {
+  margin: 16px 0 0;
+  color: #766f63;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.artifact-node .react-flow__handle {
+  width: 9px;
+  height: 9px;
+  background: #f6f2e8;
+  border: 2px solid #81786a;
 }
