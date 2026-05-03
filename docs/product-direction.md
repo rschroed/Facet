@@ -14,6 +14,8 @@ Facets owns three artifact types:
 
 React Flow renders those artifacts, but React Flow node data is not the long-term source of truth.
 
+See [Artifact model](artifact-model.md) for the initial TypeScript domain model and React Flow boundary.
+
 ## Core Relationships
 
 Facets owns relationship types separately from React Flow edges:
@@ -61,6 +63,8 @@ Prompt nodes include a copy action for manual paste into ChatGPT, Codex, or Chat
 Local persistence should save and load Facets project data, not raw React Flow state.
 
 Artifact content should remain separate from canvas rendering state. React Flow viewport and layout data may be saved alongside the artifact model, but should not become the source of truth for Brief, Direction, Prompt, or relationship content.
+
+The full local project file format remains deferred to issue #3.
 
 ## V1 Boundaries
 
