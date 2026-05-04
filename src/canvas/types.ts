@@ -23,6 +23,8 @@ export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
 
 export type RelationshipEdgeData = {
   relationship: FacetsRelationship;
+  showGenerateDirections?: boolean;
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void;
 };
 
-export type RelationshipEdge = Edge<RelationshipEdgeData, "smoothstep">;
+export type RelationshipEdge = Edge<RelationshipEdgeData, "relationship">;

@@ -24,6 +24,7 @@ export type MapProjectFileToReactFlowOptions = {
   canvasView?: FacetsCanvasView;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void;
 };
 
 export function mapProjectFileToReactFlow(
@@ -32,6 +33,14 @@ export function mapProjectFileToReactFlow(
 ): FacetsReactFlowGraph {
   const project = options.project ?? projectFile.project;
   const canvasView = options.canvasView ?? projectFile.canvasView;
+  const artifactsById = new Map(
+    project.canvas.artifacts.map((artifact) => [artifact.id, artifact]),
+  );
+  const generateDirectionsRelationshipId = project.canvas.relationships.find(
+    (relationship) =>
+      relationship.type === "brief_to_direction" &&
+      artifactsById.get(relationship.sourceId)?.type === "brief",
+  )?.id;
 
   return {
     nodes: project.canvas.artifacts.map((artifact) =>
@@ -42,7 +51,13 @@ export function mapProjectFileToReactFlow(
         options.onUpdateBrief,
       ),
     ),
-    edges: project.canvas.relationships.map(mapRelationshipToEdge),
+    edges: project.canvas.relationships.map((relationship) =>
+      mapRelationshipToEdge(
+        relationship,
+        relationship.id === generateDirectionsRelationshipId,
+        options.onGenerateDirections,
+      ),
+    ),
   };
 }
 
@@ -113,14 +128,20 @@ function getArtifactNodeData(
 
 function mapRelationshipToEdge(
   relationship: FacetsRelationship,
+  showGenerateDirections: boolean,
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void,
 ): RelationshipEdge {
   return {
     id: relationship.id,
-    type: "smoothstep",
+    type: "relationship",
     source: relationship.sourceId,
     target: relationship.targetId,
     label: getRelationshipLabel(relationship),
-    data: { relationship },
+    data: {
+      relationship,
+      showGenerateDirections,
+      onGenerateDirections,
+    },
     selectable: false,
     reconnectable: false,
   };
