@@ -18,7 +18,7 @@ import type {
 
 const GENERATED_DIRECTIONS_GROUP_ID = "generated-directions-group";
 const GENERATED_DIRECTION_GROUP_X = 420;
-const GENERATED_DIRECTION_GROUP_Y = 260;
+const GENERATED_DIRECTION_GROUP_Y = 0;
 const GENERATED_DIRECTION_GROUP_WIDTH = 380;
 const GENERATED_DIRECTION_GROUP_ROW_HEIGHT = 260;
 const GENERATED_DIRECTION_GROUP_BASE_HEIGHT = 48;
@@ -51,6 +51,9 @@ export function mapProjectFileToReactFlow(
       relationship.type === "brief_to_direction" &&
       artifactsById.get(relationship.sourceId)?.type === "brief",
   )?.id;
+  const sourceBrief = project.canvas.artifacts.find(
+    (artifact) => artifact.type === "brief",
+  );
 
   const generatedDirectionCount = project.canvas.artifacts.filter(
     isGeneratedDirectionArtifact,
@@ -68,15 +71,18 @@ export function mapProjectFileToReactFlow(
             options.onGenerateDirections,
           ),
         ]
-      : [];
-  const generatedDirectionsGroupNode =
-    generatedDirectionCount > 0
-      ? [mapGeneratedDirectionsGroupNode(generatedDirectionCount)]
-      : [];
+      : sourceBrief
+        ? [
+            mapEmptyGeneratedDirectionsGroupEdge(
+              sourceBrief.id,
+              options.onGenerateDirections,
+            ),
+          ]
+        : [];
 
   return {
     nodes: [
-      ...generatedDirectionsGroupNode,
+      mapGeneratedDirectionsGroupNode(generatedDirectionCount),
       ...project.canvas.artifacts.map((artifact) =>
         mapArtifactToNode(
           artifact,
@@ -97,7 +103,7 @@ export function mapProjectFileToReactFlow(
         .map((relationship) =>
           mapRelationshipToEdge(
             relationship,
-            generatedDirectionCount === 0 &&
+            generatedDirectionCount === 0 && !sourceBrief &&
               relationship.id === generateDirectionsRelationshipId,
             options.onGenerateDirections,
           ),
@@ -161,7 +167,8 @@ function mapGeneratedDirectionsGroupNode(
       width: GENERATED_DIRECTION_GROUP_WIDTH,
       height:
         GENERATED_DIRECTION_GROUP_BASE_HEIGHT +
-        generatedDirectionCount * GENERATED_DIRECTION_GROUP_ROW_HEIGHT,
+        Math.max(generatedDirectionCount, 1) *
+          GENERATED_DIRECTION_GROUP_ROW_HEIGHT,
     },
   };
 }
@@ -178,6 +185,27 @@ function mapGeneratedDirectionsGroupEdge(
     label: "Generated directions",
     data: {
       relationship,
+      sourceBriefId: relationship.sourceId,
+      showGenerateDirections: true,
+      onGenerateDirections,
+    },
+    selectable: false,
+    reconnectable: false,
+  };
+}
+
+function mapEmptyGeneratedDirectionsGroupEdge(
+  sourceBriefId: ArtifactId,
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void,
+): RelationshipEdge {
+  return {
+    id: `relationship-${sourceBriefId}-${GENERATED_DIRECTIONS_GROUP_ID}`,
+    type: "relationship",
+    source: sourceBriefId,
+    target: GENERATED_DIRECTIONS_GROUP_ID,
+    label: "Generated directions",
+    data: {
+      sourceBriefId,
       showGenerateDirections: true,
       onGenerateDirections,
     },

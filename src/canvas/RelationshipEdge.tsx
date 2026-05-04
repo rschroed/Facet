@@ -30,8 +30,8 @@ function RelationshipEdge({
   function handleGenerateClick(event: MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
 
-    if (data?.relationship.type === "brief_to_direction") {
-      data.onGenerateDirections?.(data.relationship.sourceId);
+    if (data?.sourceBriefId) {
+      data.onGenerateDirections?.(data.sourceBriefId);
     }
   }
 

@@ -34,7 +34,8 @@ export type DirectionGroupNode = Node<
 export type FacetsCanvasNode = ArtifactNode | DirectionGroupNode;
 
 export type RelationshipEdgeData = {
-  relationship: FacetsRelationship;
+  relationship?: FacetsRelationship;
+  sourceBriefId?: ArtifactId;
   showGenerateDirections?: boolean;
   onGenerateDirections?: (sourceBriefId: ArtifactId) => void;
 };
