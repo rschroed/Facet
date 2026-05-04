@@ -3,6 +3,7 @@ import { Background, Controls, ReactFlow, type NodeTypes } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import ArtifactNode from "./canvas/ArtifactNode";
 import { mapProjectFileToReactFlow } from "./canvas/mapFacetsToReactFlow";
+import type { BriefArtifactPatch } from "./canvas/types";
 import type { ArtifactId } from "./domain";
 import { staticProjectFile } from "./fixtures/staticProject";
 import "./styles.css";
@@ -12,6 +13,7 @@ const nodeTypes = {
 } satisfies NodeTypes;
 
 function App() {
+  const [project, setProject] = useState(staticProjectFile.project);
   const [canvasView, setCanvasView] = useState(staticProjectFile.canvasView);
 
   const handleToggleExpanded = useCallback((artifactId: ArtifactId) => {
@@ -31,13 +33,32 @@ function App() {
     });
   }, []);
 
+  const handleUpdateBrief = useCallback(
+    (artifactId: ArtifactId, patch: BriefArtifactPatch) => {
+      setProject((currentProject) => ({
+        ...currentProject,
+        canvas: {
+          ...currentProject.canvas,
+          artifacts: currentProject.canvas.artifacts.map((artifact) =>
+            artifact.id === artifactId && artifact.type === "brief"
+              ? { ...artifact, ...patch }
+              : artifact,
+          ),
+        },
+      }));
+    },
+    [],
+  );
+
   const staticGraph = useMemo(
     () =>
       mapProjectFileToReactFlow(staticProjectFile, {
+        project,
         canvasView,
         onToggleExpanded: handleToggleExpanded,
+        onUpdateBrief: handleUpdateBrief,
       }),
-    [canvasView, handleToggleExpanded],
+    [canvasView, handleToggleExpanded, handleUpdateBrief, project],
   );
 
   return (

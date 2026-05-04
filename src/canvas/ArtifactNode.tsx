@@ -1,7 +1,10 @@
-import type { MouseEvent } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { getPromptTargetLabel } from "./mapFacetsToReactFlow";
-import type { ArtifactNode as ArtifactNodeType } from "./types";
+import type {
+  ArtifactNode as ArtifactNodeType,
+  BriefArtifactPatch,
+} from "./types";
 
 function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
   const toggleLabel = data.expanded ? "Collapse" : "Expand";
@@ -30,14 +33,86 @@ function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
           {toggleLabel}
         </button>
       </header>
+      <ArtifactNodeBody data={data} />
+      <Handle type="source" position={Position.Right} isConnectable={false} />
+    </article>
+  );
+}
+
+function ArtifactNodeBody({ data }: Pick<ArtifactNodeType, "data">) {
+  if (data.artifact.type === "brief" && data.expanded) {
+    return (
+      <EditableBriefFields
+        artifact={data.artifact}
+        onUpdateBrief={data.onUpdateBrief}
+      />
+    );
+  }
+
+  return (
+    <>
       <h2 className="artifact-node__title">{data.artifact.title}</h2>
       {data.expanded ? (
         <ExpandedArtifactFields artifact={data.artifact} />
       ) : (
         <p className="artifact-node__summary">{data.summary}</p>
       )}
-      <Handle type="source" position={Position.Right} isConnectable={false} />
-    </article>
+    </>
+  );
+}
+
+function EditableBriefFields({
+  artifact,
+  onUpdateBrief,
+}: Pick<ArtifactNodeType["data"], "onUpdateBrief"> & {
+  artifact: Extract<ArtifactNodeType["data"]["artifact"], { type: "brief" }>;
+}) {
+  function handleChange<K extends keyof BriefArtifactPatch>(
+    field: K,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    onUpdateBrief?.(artifact.id, { [field]: event.target.value });
+  }
+
+  return (
+    <div className="artifact-node__editor">
+      <label className="artifact-node__edit-field">
+        <span>Title</span>
+        <input
+          className="artifact-node__input nodrag nopan"
+          type="text"
+          value={artifact.title}
+          onChange={(event) => handleChange("title", event)}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Brief</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.brief}
+          onChange={(event) => handleChange("brief", event)}
+          rows={4}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Audience</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.audience}
+          onChange={(event) => handleChange("audience", event)}
+          rows={2}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Constraints</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.constraints}
+          onChange={(event) => handleChange("constraints", event)}
+          rows={3}
+        />
+      </label>
+    </div>
   );
 }
 

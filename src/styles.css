@@ -66,7 +66,9 @@ body {
 }
 
 .artifact-node,
-.artifact-node__action {
+.artifact-node__action,
+.artifact-node__input,
+.artifact-node__textarea {
   pointer-events: auto;
 }
 
@@ -147,12 +149,18 @@ body {
   margin: 18px 0 0;
 }
 
+.artifact-node__editor {
+  display: grid;
+  gap: 14px;
+}
+
 .artifact-node__field {
   display: grid;
   gap: 5px;
 }
 
-.artifact-node__field dt {
+.artifact-node__field dt,
+.artifact-node__edit-field span {
   color: #81786a;
   font-size: 11px;
   font-weight: 800;
@@ -160,11 +168,50 @@ body {
   text-transform: uppercase;
 }
 
+.artifact-node__edit-field {
+  display: grid;
+  gap: 6px;
+}
+
 .artifact-node__field dd {
   margin: 0;
   color: #4f4a42;
   font-size: 13px;
   line-height: 1.42;
+}
+
+.artifact-node__input,
+.artifact-node__textarea {
+  width: 100%;
+  color: #24251f;
+  font: inherit;
+  letter-spacing: 0;
+  background: #fffdf7;
+  border: 1px solid rgba(31, 35, 32, 0.18);
+  border-radius: 7px;
+  outline: none;
+}
+
+.artifact-node__input {
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.artifact-node__textarea {
+  min-height: 64px;
+  padding: 9px 10px;
+  font-size: 13px;
+  line-height: 1.42;
+  resize: vertical;
+}
+
+.artifact-node__input:focus,
+.artifact-node__textarea:focus {
+  border-color: rgba(31, 124, 96, 0.5);
+  box-shadow: 0 0 0 3px rgba(31, 124, 96, 0.13);
 }
 
 .artifact-node__action {
