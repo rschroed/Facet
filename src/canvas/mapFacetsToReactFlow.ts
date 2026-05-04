@@ -2,11 +2,17 @@ import type {
   ArtifactId,
   FacetsCanvasView,
   FacetsArtifact,
+  FacetsProject,
   FacetsProjectFile,
   FacetsRelationship,
   PromptTarget,
 } from "../domain";
-import type { ArtifactNode, ArtifactNodeData, RelationshipEdge } from "./types";
+import type {
+  ArtifactNode,
+  ArtifactNodeData,
+  BriefArtifactPatch,
+  RelationshipEdge,
+} from "./types";
 
 export type FacetsReactFlowGraph = {
   nodes: ArtifactNode[];
@@ -14,21 +20,29 @@ export type FacetsReactFlowGraph = {
 };
 
 export type MapProjectFileToReactFlowOptions = {
+  project?: FacetsProject;
   canvasView?: FacetsCanvasView;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
+  onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
 };
 
 export function mapProjectFileToReactFlow(
   projectFile: FacetsProjectFile,
   options: MapProjectFileToReactFlowOptions = {},
 ): FacetsReactFlowGraph {
+  const project = options.project ?? projectFile.project;
   const canvasView = options.canvasView ?? projectFile.canvasView;
 
   return {
-    nodes: projectFile.project.canvas.artifacts.map((artifact) =>
-      mapArtifactToNode(artifact, canvasView, options.onToggleExpanded),
+    nodes: project.canvas.artifacts.map((artifact) =>
+      mapArtifactToNode(
+        artifact,
+        canvasView,
+        options.onToggleExpanded,
+        options.onUpdateBrief,
+      ),
     ),
-    edges: projectFile.project.canvas.relationships.map(mapRelationshipToEdge),
+    edges: project.canvas.relationships.map(mapRelationshipToEdge),
   };
 }
 
@@ -36,6 +50,7 @@ function mapArtifactToNode(
   artifact: FacetsArtifact,
   canvasView: FacetsCanvasView,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
+  onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
 ): ArtifactNode {
   const nodeView = canvasView.nodes[artifact.id];
 
@@ -47,6 +62,7 @@ function mapArtifactToNode(
       artifact,
       Boolean(nodeView.expanded),
       onToggleExpanded,
+      onUpdateBrief,
     ),
     draggable: false,
     selectable: false,
@@ -64,6 +80,7 @@ function getArtifactNodeData(
   artifact: FacetsArtifact,
   expanded: boolean,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
+  onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
 ): ArtifactNodeData {
   switch (artifact.type) {
     case "brief":
@@ -73,6 +90,7 @@ function getArtifactNodeData(
         summary: artifact.brief,
         expanded,
         onToggleExpanded,
+        onUpdateBrief,
       };
     case "direction":
       return {

@@ -1,5 +1,14 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { ArtifactId, FacetsArtifact, FacetsRelationship } from "../domain";
+import type {
+  ArtifactId,
+  BriefArtifact,
+  FacetsArtifact,
+  FacetsRelationship,
+} from "../domain";
+
+export type BriefArtifactPatch = Partial<
+  Pick<BriefArtifact, "title" | "brief" | "audience" | "constraints">
+>;
 
 export type ArtifactNodeData = {
   artifact: FacetsArtifact;
@@ -7,6 +16,7 @@ export type ArtifactNodeData = {
   summary: string;
   expanded: boolean;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
+  onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
 };
 
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
