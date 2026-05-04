@@ -21,8 +21,23 @@ export type ArtifactNodeData = {
 
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
 
-export type RelationshipEdgeData = {
-  relationship: FacetsRelationship;
+export type DirectionGroupNodeData = {
+  title: string;
+  count: number;
 };
 
-export type RelationshipEdge = Edge<RelationshipEdgeData, "smoothstep">;
+export type DirectionGroupNode = Node<
+  DirectionGroupNodeData,
+  "directionGroup"
+>;
+
+export type FacetsCanvasNode = ArtifactNode | DirectionGroupNode;
+
+export type RelationshipEdgeData = {
+  relationship?: FacetsRelationship;
+  sourceBriefId?: ArtifactId;
+  showGenerateDirections?: boolean;
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void;
+};
+
+export type RelationshipEdge = Edge<RelationshipEdgeData, "relationship">;
