@@ -21,6 +21,18 @@ export type ArtifactNodeData = {
 
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
 
+export type DirectionGroupNodeData = {
+  title: string;
+  count: number;
+};
+
+export type DirectionGroupNode = Node<
+  DirectionGroupNodeData,
+  "directionGroup"
+>;
+
+export type FacetsCanvasNode = ArtifactNode | DirectionGroupNode;
+
 export type RelationshipEdgeData = {
   relationship: FacetsRelationship;
   showGenerateDirections?: boolean;

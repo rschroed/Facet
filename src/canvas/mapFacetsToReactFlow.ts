@@ -11,11 +11,21 @@ import type {
   ArtifactNode,
   ArtifactNodeData,
   BriefArtifactPatch,
+  DirectionGroupNode,
+  FacetsCanvasNode,
   RelationshipEdge,
 } from "./types";
 
+const GENERATED_DIRECTIONS_GROUP_ID = "generated-directions-group";
+const GENERATED_DIRECTION_GROUP_X = 420;
+const GENERATED_DIRECTION_GROUP_Y = 260;
+const GENERATED_DIRECTION_GROUP_WIDTH = 380;
+const GENERATED_DIRECTION_GROUP_ROW_HEIGHT = 260;
+const GENERATED_DIRECTION_GROUP_BASE_HEIGHT = 48;
+const generatedDirectionIdPattern = /^direction-generated-\d+$/;
+
 export type FacetsReactFlowGraph = {
-  nodes: ArtifactNode[];
+  nodes: FacetsCanvasNode[];
   edges: RelationshipEdge[];
 };
 
@@ -42,15 +52,26 @@ export function mapProjectFileToReactFlow(
       artifactsById.get(relationship.sourceId)?.type === "brief",
   )?.id;
 
+  const generatedDirectionCount = project.canvas.artifacts.filter(
+    isGeneratedDirectionArtifact,
+  ).length;
+  const generatedDirectionsGroupNode =
+    generatedDirectionCount > 0
+      ? [mapGeneratedDirectionsGroupNode(generatedDirectionCount)]
+      : [];
+
   return {
-    nodes: project.canvas.artifacts.map((artifact) =>
-      mapArtifactToNode(
-        artifact,
-        canvasView,
-        options.onToggleExpanded,
-        options.onUpdateBrief,
+    nodes: [
+      ...generatedDirectionsGroupNode,
+      ...project.canvas.artifacts.map((artifact) =>
+        mapArtifactToNode(
+          artifact,
+          canvasView,
+          options.onToggleExpanded,
+          options.onUpdateBrief,
+        ),
       ),
-    ),
+    ],
     edges: project.canvas.relationships.map((relationship) =>
       mapRelationshipToEdge(
         relationship,
@@ -68,11 +89,14 @@ function mapArtifactToNode(
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
 ): ArtifactNode {
   const nodeView = canvasView.nodes[artifact.id];
+  const isGeneratedDirection = isGeneratedDirectionArtifact(artifact);
 
   return {
     id: artifact.id,
     type: "artifact",
     position: nodeView.position,
+    parentId: isGeneratedDirection ? GENERATED_DIRECTIONS_GROUP_ID : undefined,
+    extent: isGeneratedDirection ? "parent" : undefined,
     data: getArtifactNodeData(
       artifact,
       Boolean(nodeView.expanded),
@@ -89,6 +113,39 @@ function mapArtifactToNode(
         }
       : undefined,
   };
+}
+
+function mapGeneratedDirectionsGroupNode(
+  generatedDirectionCount: number,
+): DirectionGroupNode {
+  return {
+    id: GENERATED_DIRECTIONS_GROUP_ID,
+    type: "directionGroup",
+    position: {
+      x: GENERATED_DIRECTION_GROUP_X,
+      y: GENERATED_DIRECTION_GROUP_Y,
+    },
+    data: {
+      title: "Generated directions",
+      count: generatedDirectionCount,
+    },
+    draggable: false,
+    selectable: false,
+    zIndex: 1,
+    style: {
+      width: GENERATED_DIRECTION_GROUP_WIDTH,
+      height:
+        GENERATED_DIRECTION_GROUP_BASE_HEIGHT +
+        generatedDirectionCount * GENERATED_DIRECTION_GROUP_ROW_HEIGHT,
+    },
+  };
+}
+
+function isGeneratedDirectionArtifact(artifact: FacetsArtifact): boolean {
+  return (
+    artifact.type === "direction" &&
+    generatedDirectionIdPattern.test(artifact.id)
+  );
 }
 
 function getArtifactNodeData(

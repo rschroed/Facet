@@ -8,6 +8,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import ArtifactNode from "./canvas/ArtifactNode";
+import DirectionGroupNode from "./canvas/DirectionGroupNode";
 import { mapProjectFileToReactFlow } from "./canvas/mapFacetsToReactFlow";
 import RelationshipEdge from "./canvas/RelationshipEdge";
 import type { BriefArtifactPatch } from "./canvas/types";
@@ -21,8 +22,8 @@ import { staticProjectFile } from "./fixtures/staticProject";
 import "./styles.css";
 
 const GENERATED_DIRECTIONS_PER_CLICK = 3;
-const GENERATED_DIRECTION_X = 440;
-const GENERATED_DIRECTION_START_Y = 300;
+const GENERATED_DIRECTION_X = 20;
+const GENERATED_DIRECTION_START_Y = 64;
 const GENERATED_DIRECTION_Y_GAP = 260;
 const GENERATED_DIRECTION_WIDTH = 340;
 const GENERATED_DIRECTION_HEIGHT = 220;
@@ -30,6 +31,7 @@ const generatedDirectionIdPattern = /^direction-generated-(\d+)$/;
 
 const nodeTypes = {
   artifact: ArtifactNode,
+  directionGroup: DirectionGroupNode,
 } satisfies NodeTypes;
 
 const edgeTypes = {

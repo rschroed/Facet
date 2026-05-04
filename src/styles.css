@@ -95,6 +95,32 @@ body {
   pointer-events: all !important;
 }
 
+.react-flow__node-directionGroup {
+  pointer-events: none !important;
+}
+
+.direction-group-node {
+  width: 100%;
+  height: 100%;
+  padding: 14px;
+  background: rgba(255, 253, 247, 0.48);
+  border: 1px dashed rgba(88, 99, 131, 0.32);
+  border-radius: 10px;
+}
+
+.direction-group-node__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  padding: 0 4px;
+  color: #586383;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .artifact-node,
 .artifact-node__action,
 .artifact-node__input,
