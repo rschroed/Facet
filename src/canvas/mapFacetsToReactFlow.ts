@@ -55,6 +55,20 @@ export function mapProjectFileToReactFlow(
   const generatedDirectionCount = project.canvas.artifacts.filter(
     isGeneratedDirectionArtifact,
   ).length;
+  const generatedDirectionRelationships = project.canvas.relationships.filter(
+    (relationship) =>
+      relationship.type === "brief_to_direction" &&
+      isGeneratedDirectionArtifact(artifactsById.get(relationship.targetId)),
+  );
+  const generatedDirectionGroupEdge =
+    generatedDirectionCount > 0 && generatedDirectionRelationships.length > 0
+      ? [
+          mapGeneratedDirectionsGroupEdge(
+            generatedDirectionRelationships[0],
+            options.onGenerateDirections,
+          ),
+        ]
+      : [];
   const generatedDirectionsGroupNode =
     generatedDirectionCount > 0
       ? [mapGeneratedDirectionsGroupNode(generatedDirectionCount)]
@@ -72,13 +86,24 @@ export function mapProjectFileToReactFlow(
         ),
       ),
     ],
-    edges: project.canvas.relationships.map((relationship) =>
-      mapRelationshipToEdge(
-        relationship,
-        relationship.id === generateDirectionsRelationshipId,
-        options.onGenerateDirections,
+    edges: [
+      ...project.canvas.relationships
+        .filter(
+          (relationship) =>
+            !isGeneratedDirectionArtifact(
+              artifactsById.get(relationship.targetId),
+            ),
+        )
+        .map((relationship) =>
+          mapRelationshipToEdge(
+            relationship,
+            generatedDirectionCount === 0 &&
+              relationship.id === generateDirectionsRelationshipId,
+            options.onGenerateDirections,
+          ),
       ),
-    ),
+      ...generatedDirectionGroupEdge,
+    ],
   };
 }
 
@@ -141,9 +166,31 @@ function mapGeneratedDirectionsGroupNode(
   };
 }
 
-function isGeneratedDirectionArtifact(artifact: FacetsArtifact): boolean {
+function mapGeneratedDirectionsGroupEdge(
+  relationship: FacetsRelationship,
+  onGenerateDirections?: (sourceBriefId: ArtifactId) => void,
+): RelationshipEdge {
+  return {
+    id: `relationship-${relationship.sourceId}-${GENERATED_DIRECTIONS_GROUP_ID}`,
+    type: "relationship",
+    source: relationship.sourceId,
+    target: GENERATED_DIRECTIONS_GROUP_ID,
+    label: "Generated directions",
+    data: {
+      relationship,
+      showGenerateDirections: true,
+      onGenerateDirections,
+    },
+    selectable: false,
+    reconnectable: false,
+  };
+}
+
+function isGeneratedDirectionArtifact(
+  artifact: FacetsArtifact | undefined,
+): boolean {
   return (
-    artifact.type === "direction" &&
+    artifact?.type === "direction" &&
     generatedDirectionIdPattern.test(artifact.id)
   );
 }
