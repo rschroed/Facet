@@ -16,6 +16,7 @@ import type {
   ArtifactId,
   BriefArtifact,
   DirectionArtifact,
+  DirectionSetId,
   FacetsRelationship,
 } from "./domain";
 import { staticProjectFile } from "./fixtures/staticProject";
@@ -77,13 +78,22 @@ function App() {
   );
 
   const handleGenerateDirections = useCallback(
-    (sourceBriefId: ArtifactId) => {
+    (directionSetId: DirectionSetId) => {
+      const directionSet = project.canvas.directionSets.find(
+        (set) => set.id === directionSetId,
+      );
+      const sourceBriefRelationship = project.canvas.relationships.find(
+        (relationship) =>
+          relationship.type === "brief_to_direction_set" &&
+          relationship.targetId === directionSetId,
+      );
       const brief = project.canvas.artifacts.find(
         (artifact): artifact is BriefArtifact =>
-          artifact.id === sourceBriefId && artifact.type === "brief",
+          artifact.id === sourceBriefRelationship?.sourceId &&
+          artifact.type === "brief",
       );
 
-      if (!brief) {
+      if (!directionSet || !brief) {
         return;
       }
 
@@ -108,11 +118,16 @@ function App() {
           };
         },
       );
+      const existingDirectionSetCount = project.canvas.relationships.filter(
+        (relationship) =>
+          relationship.type === "contains_direction" &&
+          relationship.sourceId === directionSetId,
+      ).length;
       const generatedRelationships: FacetsRelationship[] =
         generatedDirections.map((direction) => ({
-          id: `relationship-${sourceBriefId}-${direction.id}`,
-          type: "brief_to_direction",
-          sourceId: sourceBriefId,
+          id: `relationship-${directionSetId}-${direction.id}`,
+          type: "contains_direction",
+          sourceId: directionSetId,
           targetId: direction.id,
         }));
 
@@ -133,7 +148,7 @@ function App() {
           ...canvasView.nodes,
           ...Object.fromEntries(
             generatedDirections.map((direction, index) => {
-              const generatedIndex = existingGeneratedCount + index;
+              const generatedIndex = existingDirectionSetCount + index;
 
               return [
                 direction.id,

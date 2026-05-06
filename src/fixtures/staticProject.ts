@@ -8,6 +8,12 @@ export const staticProjectFile: FacetsProjectFile = {
     name: "Homepage exploration",
     canvas: {
       id: "canvas-static-homepage",
+      directionSets: [
+        {
+          id: "direction-set-static-1",
+          title: "Direction Set 1",
+        },
+      ],
       artifacts: [
         {
           id: "brief-static-homepage",
@@ -20,7 +26,14 @@ export const staticProjectFile: FacetsProjectFile = {
             "Keep it practical, canvas-first, and focused on better prompts for design agents.",
         },
       ],
-      relationships: [],
+      relationships: [
+        {
+          id: "relationship-static-brief-direction-set",
+          type: "brief_to_direction_set",
+          sourceId: "brief-static-homepage",
+          targetId: "direction-set-static-1",
+        },
+      ],
     },
   },
   canvasView: {
@@ -35,6 +48,10 @@ export const staticProjectFile: FacetsProjectFile = {
         expanded: false,
         position: { x: 0, y: 0 },
         size: { width: 320, height: 220 },
+      },
+      "direction-set-static-1": {
+        position: { x: 420, y: 0 },
+        size: { width: 380, height: 308 },
       },
     },
   },

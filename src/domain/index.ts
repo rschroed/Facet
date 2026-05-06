@@ -1,7 +1,9 @@
 export type ProjectId = string;
 export type CanvasId = string;
 export type ArtifactId = string;
+export type DirectionSetId = string;
 export type RelationshipId = string;
+export type FacetsCanvasNodeId = ArtifactId | DirectionSetId;
 
 export type FacetsProject = {
   id: ProjectId;
@@ -11,6 +13,7 @@ export type FacetsProject = {
 
 export type FacetsCanvas = {
   id: CanvasId;
+  directionSets: DirectionSet[];
   artifacts: FacetsArtifact[];
   relationships: FacetsRelationship[];
 };
@@ -25,7 +28,7 @@ export type FacetsProjectFile = {
 export type FacetsCanvasView = {
   canvasId: CanvasId;
   viewport: FacetsCanvasViewport;
-  nodes: Record<ArtifactId, FacetsCanvasNodeView>;
+  nodes: Record<FacetsCanvasNodeId, FacetsCanvasNodeView>;
 };
 
 export type FacetsCanvasViewport = {
@@ -68,6 +71,11 @@ export type DirectionArtifact = {
   rationale?: string;
 };
 
+export type DirectionSet = {
+  id: DirectionSetId;
+  title: string;
+};
+
 export type PromptTarget = "chatgpt" | "codex" | "figma_mcp" | "generic";
 
 export type PromptArtifact = {
@@ -86,12 +94,14 @@ export type FacetsArtifact =
 
 export type FacetsRelationshipType =
   | "brief_to_direction"
+  | "brief_to_direction_set"
+  | "contains_direction"
   | "direction_to_prompt"
   | "prompt_sequence";
 
 export type FacetsRelationship = {
   id: RelationshipId;
   type: FacetsRelationshipType;
-  sourceId: ArtifactId;
-  targetId: ArtifactId;
+  sourceId: FacetsCanvasNodeId;
+  targetId: FacetsCanvasNodeId;
 };

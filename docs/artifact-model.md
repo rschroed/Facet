@@ -15,6 +15,7 @@ type FacetsProject = {
 
 type FacetsCanvas = {
   id: CanvasId;
+  directionSets: DirectionSet[];
   artifacts: FacetsArtifact[];
   relationships: FacetsRelationship[];
 };
@@ -69,8 +70,8 @@ Relationships are Facets domain objects, not React Flow edges:
 type FacetsRelationship = {
   id: RelationshipId;
   type: FacetsRelationshipType;
-  sourceId: ArtifactId;
-  targetId: ArtifactId;
+  sourceId: FacetsCanvasNodeId;
+  targetId: FacetsCanvasNodeId;
 };
 ```
 

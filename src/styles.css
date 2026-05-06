@@ -60,43 +60,13 @@ body {
   letter-spacing: 0;
 }
 
-.relationship-edge__label {
-  position: absolute;
-  pointer-events: all;
-}
-
-.relationship-edge__button {
-  min-height: 30px;
-  padding: 0 12px;
-  color: #fffdf7;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 750;
-  letter-spacing: 0;
-  white-space: nowrap;
-  background: #1f7c60;
-  border: 1px solid rgba(31, 35, 32, 0.1);
-  border-radius: 7px;
-  box-shadow: 0 10px 24px rgba(54, 48, 36, 0.16);
-  cursor: pointer;
-}
-
-.relationship-edge__button:hover {
-  background: #18684f;
-}
-
-.relationship-edge__button:focus-visible {
-  outline: 3px solid rgba(31, 124, 96, 0.24);
-  outline-offset: 2px;
-}
-
 .react-flow__node {
   z-index: 2;
   pointer-events: all !important;
 }
 
 .react-flow__node-directionGroup {
-  pointer-events: none !important;
+  pointer-events: all !important;
 }
 
 .direction-group-node {
@@ -112,6 +82,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   min-height: 28px;
   padding: 0 4px;
   color: #586383;
@@ -119,6 +90,41 @@ body {
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.direction-group-node__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.direction-group-node__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 11px;
+  color: #fffdf7;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  background: #586383;
+  border: 1px solid rgba(31, 35, 32, 0.1);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.direction-group-node__action:hover {
+  background: #48526f;
+}
+
+.direction-group-node__action:focus-visible {
+  outline: 3px solid rgba(88, 99, 131, 0.24);
+  outline-offset: 2px;
 }
 
 .artifact-node,
