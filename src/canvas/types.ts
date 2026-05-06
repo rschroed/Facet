@@ -2,6 +2,8 @@ import type { Edge, Node } from "@xyflow/react";
 import type {
   ArtifactId,
   BriefArtifact,
+  DirectionSet,
+  DirectionSetId,
   FacetsArtifact,
   FacetsRelationship,
 } from "../domain";
@@ -22,8 +24,9 @@ export type ArtifactNodeData = {
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
 
 export type DirectionGroupNodeData = {
-  title: string;
+  directionSet: DirectionSet;
   count: number;
+  onGenerateDirections?: (directionSetId: DirectionSetId) => void;
 };
 
 export type DirectionGroupNode = Node<
@@ -34,10 +37,7 @@ export type DirectionGroupNode = Node<
 export type FacetsCanvasNode = ArtifactNode | DirectionGroupNode;
 
 export type RelationshipEdgeData = {
-  relationship?: FacetsRelationship;
-  sourceBriefId?: ArtifactId;
-  showGenerateDirections?: boolean;
-  onGenerateDirections?: (sourceBriefId: ArtifactId) => void;
+  relationship: FacetsRelationship;
 };
 
 export type RelationshipEdge = Edge<RelationshipEdgeData, "relationship">;

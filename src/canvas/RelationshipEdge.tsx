@@ -1,10 +1,8 @@
 import {
   BaseEdge,
-  EdgeLabelRenderer,
   getSmoothStepPath,
   type EdgeProps,
 } from "@xyflow/react";
-import type { MouseEvent } from "react";
 import type { RelationshipEdge as RelationshipEdgeType } from "./types";
 
 function RelationshipEdge({
@@ -16,9 +14,8 @@ function RelationshipEdge({
   sourcePosition,
   targetPosition,
   label,
-  data,
 }: EdgeProps<RelationshipEdgeType>) {
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
+  const [edgePath] = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -27,41 +24,7 @@ function RelationshipEdge({
     targetPosition,
   });
 
-  function handleGenerateClick(event: MouseEvent<HTMLButtonElement>) {
-    event.stopPropagation();
-
-    if (data?.sourceBriefId) {
-      data.onGenerateDirections?.(data.sourceBriefId);
-    }
-  }
-
-  return (
-    <>
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        label={data?.showGenerateDirections ? undefined : label}
-      />
-      {data?.showGenerateDirections ? (
-        <EdgeLabelRenderer>
-          <div
-            className="relationship-edge__label nodrag nopan"
-            style={{
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-            }}
-          >
-            <button
-              className="relationship-edge__button"
-              type="button"
-              onClick={handleGenerateClick}
-            >
-              Generate directions
-            </button>
-          </div>
-        </EdgeLabelRenderer>
-      ) : null}
-    </>
-  );
+  return <BaseEdge id={id} path={edgePath} label={label} />;
 }
 
 export default RelationshipEdge;

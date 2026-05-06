@@ -30,6 +30,7 @@ type FacetsProject = {
 
 type FacetsCanvas = {
   id: CanvasId;
+  directionSets: DirectionSet[];
   artifacts: FacetsArtifact[];
   relationships: FacetsRelationship[];
 };
@@ -41,7 +42,7 @@ Canvas rendering state is stored separately:
 type FacetsCanvasView = {
   canvasId: CanvasId;
   viewport: FacetsCanvasViewport;
-  nodes: Record<ArtifactId, FacetsCanvasNodeView>;
+  nodes: Record<FacetsCanvasNodeId, FacetsCanvasNodeView>;
 };
 
 type FacetsCanvasViewport = {
@@ -71,7 +72,7 @@ type FacetsCanvasNodeSize = {
 
 ## React Flow Boundary
 
-React Flow nodes are derived from `project.canvas.artifacts` plus `canvasView.nodes`.
+React Flow nodes are derived from `project.canvas.artifacts`, `project.canvas.directionSets`, and `canvasView.nodes`.
 
 React Flow edges are derived from `project.canvas.relationships`.
 
@@ -79,7 +80,7 @@ React Flow viewport is derived from `canvasView.viewport`.
 
 Raw React Flow state should not be serialized as the Facets project file format. React Flow can provide useful rendering details, but the saved file should preserve the Facets domain model and the minimum canvas view state needed to restore the workbench.
 
-Artifact content lives in `project.canvas.artifacts`. Relationship content lives in `project.canvas.relationships`. Viewport, position, size, and expanded state live in `canvasView`.
+Artifact content lives in `project.canvas.artifacts`. Direction Set grouping data lives in `project.canvas.directionSets`. Relationship content lives in `project.canvas.relationships`. Viewport, position, size, and expanded state live in `canvasView`.
 
 ## Example
 
@@ -94,6 +95,12 @@ The example below is illustrative documentation, not a committed sample file or 
     "name": "Homepage exploration",
     "canvas": {
       "id": "canvas-1",
+      "directionSets": [
+        {
+          "id": "direction-set-1",
+          "title": "Direction Set 1"
+        }
+      ],
       "artifacts": [
         {
           "id": "brief-1",
@@ -123,12 +130,18 @@ The example below is illustrative documentation, not a committed sample file or 
       "relationships": [
         {
           "id": "relationship-1",
-          "type": "brief_to_direction",
+          "type": "brief_to_direction_set",
           "sourceId": "brief-1",
-          "targetId": "direction-1"
+          "targetId": "direction-set-1"
         },
         {
           "id": "relationship-2",
+          "type": "contains_direction",
+          "sourceId": "direction-set-1",
+          "targetId": "direction-1"
+        },
+        {
+          "id": "relationship-3",
           "type": "direction_to_prompt",
           "sourceId": "direction-1",
           "targetId": "prompt-1"
@@ -155,10 +168,20 @@ The example below is illustrative documentation, not a committed sample file or 
           "height": 240
         }
       },
-      "direction-1": {
+      "direction-set-1": {
         "position": {
           "x": 420,
           "y": 0
+        },
+        "size": {
+          "width": 380,
+          "height": 308
+        }
+      },
+      "direction-1": {
+        "position": {
+          "x": 20,
+          "y": 64
         }
       },
       "prompt-1": {
