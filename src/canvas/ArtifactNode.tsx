@@ -4,6 +4,7 @@ import { getPromptTargetLabel } from "./mapFacetsToReactFlow";
 import type {
   ArtifactNode as ArtifactNodeType,
   BriefArtifactPatch,
+  DirectionArtifactPatch,
 } from "./types";
 
 function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
@@ -45,6 +46,15 @@ function ArtifactNodeBody({ data }: Pick<ArtifactNodeType, "data">) {
       <EditableBriefFields
         artifact={data.artifact}
         onUpdateBrief={data.onUpdateBrief}
+      />
+    );
+  }
+
+  if (data.artifact.type === "direction" && data.expanded) {
+    return (
+      <EditableDirectionFields
+        artifact={data.artifact}
+        onUpdateDirection={data.onUpdateDirection}
       />
     );
   }
@@ -109,6 +119,64 @@ function EditableBriefFields({
           className="artifact-node__textarea nodrag nopan"
           value={artifact.constraints}
           onChange={(event) => handleChange("constraints", event)}
+          rows={3}
+        />
+      </label>
+    </div>
+  );
+}
+
+function EditableDirectionFields({
+  artifact,
+  onUpdateDirection,
+}: Pick<ArtifactNodeType["data"], "onUpdateDirection"> & {
+  artifact: Extract<
+    ArtifactNodeType["data"]["artifact"],
+    { type: "direction" }
+  >;
+}) {
+  function handleChange<K extends keyof DirectionArtifactPatch>(
+    field: K,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    onUpdateDirection?.(artifact.id, { [field]: event.target.value });
+  }
+
+  return (
+    <div className="artifact-node__editor">
+      <label className="artifact-node__edit-field">
+        <span>Title</span>
+        <input
+          className="artifact-node__input nodrag nopan"
+          type="text"
+          value={artifact.title}
+          onChange={(event) => handleChange("title", event)}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Angle</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.angle}
+          onChange={(event) => handleChange("angle", event)}
+          rows={3}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Notes</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.notes}
+          onChange={(event) => handleChange("notes", event)}
+          rows={4}
+        />
+      </label>
+      <label className="artifact-node__edit-field">
+        <span>Rationale</span>
+        <textarea
+          className="artifact-node__textarea nodrag nopan"
+          value={artifact.rationale ?? ""}
+          onChange={(event) => handleChange("rationale", event)}
           rows={3}
         />
       </label>

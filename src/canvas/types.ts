@@ -2,6 +2,7 @@ import type { Edge, Node } from "@xyflow/react";
 import type {
   ArtifactId,
   BriefArtifact,
+  DirectionArtifact,
   DirectionSet,
   DirectionSetId,
   FacetsArtifact,
@@ -12,6 +13,10 @@ export type BriefArtifactPatch = Partial<
   Pick<BriefArtifact, "title" | "brief" | "audience" | "constraints">
 >;
 
+export type DirectionArtifactPatch = Partial<
+  Pick<DirectionArtifact, "title" | "angle" | "notes" | "rationale">
+>;
+
 export type ArtifactNodeData = {
   artifact: FacetsArtifact;
   typeLabel: string;
@@ -19,6 +24,10 @@ export type ArtifactNodeData = {
   expanded: boolean;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void;
 };
 
 export type ArtifactNode = Node<ArtifactNodeData, "artifact">;

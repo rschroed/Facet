@@ -1,5 +1,6 @@
 import type {
   ArtifactId,
+  DirectionArtifact,
   DirectionSet,
   DirectionSetId,
   FacetsArtifact,
@@ -13,6 +14,7 @@ import type {
   ArtifactNode,
   ArtifactNodeData,
   BriefArtifactPatch,
+  DirectionArtifactPatch,
   DirectionGroupNode,
   FacetsCanvasNode,
   RelationshipEdge,
@@ -20,7 +22,9 @@ import type {
 
 const DIRECTION_SET_WIDTH = 380;
 const DIRECTION_SET_ROW_HEIGHT = 260;
+const DIRECTION_SET_EXPANDED_ROW_HEIGHT = 540;
 const DIRECTION_SET_BASE_HEIGHT = 48;
+const DIRECTION_SET_CHILD_START_Y = 64;
 
 export type FacetsReactFlowGraph = {
   nodes: FacetsCanvasNode[];
@@ -32,6 +36,10 @@ export type MapProjectFileToReactFlowOptions = {
   canvasView?: FacetsCanvasView;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
 };
 
@@ -44,6 +52,11 @@ export function mapProjectFileToReactFlow(
   const directionSetByDirectionId = getDirectionSetByDirectionId(
     project.canvas.relationships,
   );
+  const directionSetLayout = getDirectionSetLayout(
+    project.canvas.artifacts,
+    project.canvas.relationships,
+    canvasView,
+  );
 
   return {
     nodes: [
@@ -52,6 +65,7 @@ export function mapProjectFileToReactFlow(
           directionSet,
           canvasView,
           getDirectionCount(directionSet.id, project.canvas.relationships),
+          directionSetLayout.groupHeights.get(directionSet.id),
           isDirectionSetConnected(directionSet.id, project.canvas.relationships),
           options.onGenerateDirections,
         ),
@@ -61,8 +75,10 @@ export function mapProjectFileToReactFlow(
           artifact,
           canvasView,
           directionSetByDirectionId.get(artifact.id),
+          directionSetLayout.childPositions.get(artifact.id),
           options.onToggleExpanded,
           options.onUpdateBrief,
+          options.onUpdateDirection,
         ),
       ),
     ],
@@ -76,6 +92,7 @@ function mapDirectionSetToNode(
   directionSet: DirectionSet,
   canvasView: FacetsCanvasView,
   directionCount: number,
+  groupHeight: number | undefined,
   canGenerate: boolean,
   onGenerateDirections?: (directionSetId: DirectionSetId) => void,
 ): DirectionGroupNode {
@@ -97,8 +114,9 @@ function mapDirectionSetToNode(
     style: {
       width: nodeView.size?.width ?? DIRECTION_SET_WIDTH,
       height:
+        groupHeight ??
         DIRECTION_SET_BASE_HEIGHT +
-        Math.max(directionCount, 1) * DIRECTION_SET_ROW_HEIGHT,
+          Math.max(directionCount, 1) * DIRECTION_SET_ROW_HEIGHT,
     },
   };
 }
@@ -107,15 +125,25 @@ function mapArtifactToNode(
   artifact: FacetsArtifact,
   canvasView: FacetsCanvasView,
   parentDirectionSetId: DirectionSetId | undefined,
+  reflowedPosition:
+    | {
+        x: number;
+        y: number;
+      }
+    | undefined,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void,
 ): ArtifactNode {
   const nodeView = canvasView.nodes[artifact.id];
 
   return {
     id: artifact.id,
     type: "artifact",
-    position: nodeView.position,
+    position: reflowedPosition ?? nodeView.position,
     parentId: parentDirectionSetId,
     extent: parentDirectionSetId ? "parent" : undefined,
     data: getArtifactNodeData(
@@ -123,6 +151,7 @@ function mapArtifactToNode(
       Boolean(nodeView.expanded),
       onToggleExpanded,
       onUpdateBrief,
+      onUpdateDirection,
     ),
     draggable: false,
     selectable: false,
@@ -133,6 +162,73 @@ function mapArtifactToNode(
           minHeight: nodeView.size.height,
         }
       : undefined,
+  };
+}
+
+type DirectionSetLayout = {
+  childPositions: Map<ArtifactId, { x: number; y: number }>;
+  groupHeights: Map<DirectionSetId, number>;
+};
+
+function getDirectionSetLayout(
+  artifacts: FacetsArtifact[],
+  relationships: FacetsRelationship[],
+  canvasView: FacetsCanvasView,
+): DirectionSetLayout {
+  const directionById = new Map<ArtifactId, DirectionArtifact>();
+  const directionIdsBySetId = new Map<DirectionSetId, ArtifactId[]>();
+  const childPositions = new Map<ArtifactId, { x: number; y: number }>();
+  const groupHeights = new Map<DirectionSetId, number>();
+
+  artifacts.forEach((artifact) => {
+    if (artifact.type === "direction") {
+      directionById.set(artifact.id, artifact);
+    }
+  });
+
+  relationships.forEach((relationship) => {
+    if (
+      relationship.type === "contains_direction" &&
+      directionById.has(relationship.targetId)
+    ) {
+      const existingDirectionIds =
+        directionIdsBySetId.get(relationship.sourceId) ?? [];
+
+      directionIdsBySetId.set(relationship.sourceId, [
+        ...existingDirectionIds,
+        relationship.targetId,
+      ]);
+    }
+  });
+
+  directionIdsBySetId.forEach((directionIds, directionSetId) => {
+    let nextY = DIRECTION_SET_CHILD_START_Y;
+
+    directionIds.forEach((directionId) => {
+      const nodeView = canvasView.nodes[directionId];
+      const rowHeight = nodeView.expanded
+        ? DIRECTION_SET_EXPANDED_ROW_HEIGHT
+        : DIRECTION_SET_ROW_HEIGHT;
+
+      childPositions.set(directionId, {
+        x: nodeView.position.x,
+        y: nextY,
+      });
+      nextY += rowHeight;
+    });
+
+    groupHeights.set(
+      directionSetId,
+      Math.max(
+        DIRECTION_SET_BASE_HEIGHT + DIRECTION_SET_ROW_HEIGHT,
+        DIRECTION_SET_BASE_HEIGHT + nextY - DIRECTION_SET_CHILD_START_Y,
+      ),
+    );
+  });
+
+  return {
+    childPositions,
+    groupHeights,
   };
 }
 
@@ -177,6 +273,10 @@ function getArtifactNodeData(
   expanded: boolean,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void,
 ): ArtifactNodeData {
   switch (artifact.type) {
     case "brief":
@@ -195,6 +295,7 @@ function getArtifactNodeData(
         summary: artifact.angle,
         expanded,
         onToggleExpanded,
+        onUpdateDirection,
       };
     case "prompt":
       return {
