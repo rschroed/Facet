@@ -26,6 +26,7 @@ export type ArtifactNode = Node<ArtifactNodeData, "artifact">;
 export type DirectionGroupNodeData = {
   directionSet: DirectionSet;
   count: number;
+  canGenerate: boolean;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
 };
 
