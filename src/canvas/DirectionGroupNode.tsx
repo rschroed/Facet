@@ -20,7 +20,11 @@ function DirectionGroupNode({ data }: NodeProps<DirectionGroupNodeType>) {
 
   return (
     <section className="direction-group-node">
-      <Handle type="target" position={Position.Left} isConnectable={false} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        isConnectable={data.canAcceptConnection}
+      />
       <header className="direction-group-node__header">
         <div className="direction-group-node__title">
           <span>{data.directionSet.title}</span>

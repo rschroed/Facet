@@ -67,6 +67,7 @@ export function mapProjectFileToReactFlow(
           getDirectionCount(directionSet.id, project.canvas.relationships),
           directionSetLayout.groupHeights.get(directionSet.id),
           isDirectionSetConnected(directionSet.id, project.canvas.relationships),
+          true,
           options.onGenerateDirections,
         ),
       ),
@@ -94,6 +95,7 @@ function mapDirectionSetToNode(
   directionCount: number,
   groupHeight: number | undefined,
   canGenerate: boolean,
+  canAcceptConnection: boolean,
   onGenerateDirections?: (directionSetId: DirectionSetId) => void,
 ): DirectionGroupNode {
   const nodeView = canvasView.nodes[directionSet.id];
@@ -106,6 +108,7 @@ function mapDirectionSetToNode(
       directionSet,
       count: directionCount,
       canGenerate,
+      canAcceptConnection,
       onGenerateDirections,
     },
     draggable: false,
@@ -285,6 +288,7 @@ function getArtifactNodeData(
         typeLabel: "Brief",
         summary: artifact.brief,
         expanded,
+        canStartConnection: true,
         onToggleExpanded,
         onUpdateBrief,
       };
@@ -294,6 +298,7 @@ function getArtifactNodeData(
         typeLabel: "Direction",
         summary: artifact.angle,
         expanded,
+        canStartConnection: false,
         onToggleExpanded,
         onUpdateDirection,
       };
@@ -303,6 +308,7 @@ function getArtifactNodeData(
         typeLabel: "Prompt",
         summary: artifact.summary,
         expanded,
+        canStartConnection: false,
         onToggleExpanded,
       };
   }
