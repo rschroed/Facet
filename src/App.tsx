@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import {
   Background,
   Controls,
@@ -13,7 +19,11 @@ import ArtifactNode from "./canvas/ArtifactNode";
 import DirectionGroupNode from "./canvas/DirectionGroupNode";
 import { mapProjectFileToReactFlow } from "./canvas/mapFacetsToReactFlow";
 import RelationshipEdge from "./canvas/RelationshipEdge";
-import type { BriefArtifactPatch, DirectionArtifactPatch } from "./canvas/types";
+import type {
+  BriefArtifactPatch,
+  DirectionArtifactPatch,
+  RelationshipEdge as RelationshipEdgeType,
+} from "./canvas/types";
 import type {
   ArtifactId,
   BriefArtifact,
@@ -95,6 +105,9 @@ function canConnectBriefToDirectionSet(
 function App() {
   const [project, setProject] = useState(staticProjectFile.project);
   const [canvasView, setCanvasView] = useState(staticProjectFile.canvasView);
+  const [selectedRelationshipId, setSelectedRelationshipId] = useState<
+    string | null
+  >(null);
 
   const handleToggleExpanded = useCallback((artifactId: ArtifactId) => {
     setCanvasView((currentCanvasView) => {
@@ -360,6 +373,83 @@ function App() {
     [project],
   );
 
+  const handleEdgesDelete = useCallback(
+    (deletedEdges: RelationshipEdgeType[]) => {
+      const deletedEdgeIds = new Set(deletedEdges.map((edge) => edge.id));
+
+      setProject((currentProject) => ({
+        ...currentProject,
+        canvas: {
+          ...currentProject.canvas,
+          relationships: currentProject.canvas.relationships.filter(
+            (relationship) =>
+              relationship.type !== "brief_to_direction_set" ||
+              !deletedEdgeIds.has(relationship.id),
+          ),
+        },
+      }));
+      setSelectedRelationshipId(null);
+    },
+    [],
+  );
+
+  const handleDisconnectBriefFromDirectionSet = useCallback(
+    (relationshipId: string) => {
+      setProject((currentProject) => ({
+        ...currentProject,
+        canvas: {
+          ...currentProject.canvas,
+          relationships: currentProject.canvas.relationships.filter(
+            (relationship) =>
+              relationship.id !== relationshipId ||
+              relationship.type !== "brief_to_direction_set",
+          ),
+        },
+      }));
+      setSelectedRelationshipId(null);
+    },
+    [],
+  );
+
+  const handleEdgeClick = useCallback(
+    (
+      event: ReactMouseEvent<Element>,
+      edge: RelationshipEdgeType,
+    ) => {
+      event.stopPropagation();
+      setSelectedRelationshipId(
+        edge.data?.relationship.type === "brief_to_direction_set"
+          ? edge.data.relationship.id
+          : null,
+      );
+    },
+    [],
+  );
+
+  const handlePaneClick = useCallback(() => {
+    setSelectedRelationshipId(null);
+  }, []);
+
+  useEffect(() => {
+    function handleWindowKeyDown(event: KeyboardEvent) {
+      if (
+        !selectedRelationshipId ||
+        (event.key !== "Delete" && event.key !== "Backspace")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      handleDisconnectBriefFromDirectionSet(selectedRelationshipId);
+    }
+
+    window.addEventListener("keydown", handleWindowKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleWindowKeyDown);
+    };
+  }, [handleDisconnectBriefFromDirectionSet, selectedRelationshipId]);
+
   const staticGraph = useMemo(
     () =>
       mapProjectFileToReactFlow(staticProjectFile, {
@@ -369,6 +459,7 @@ function App() {
         onUpdateBrief: handleUpdateBrief,
         onUpdateDirection: handleUpdateDirection,
         onGenerateDirections: handleGenerateDirections,
+        selectedRelationshipId,
       }),
     [
       canvasView,
@@ -377,6 +468,7 @@ function App() {
       handleUpdateBrief,
       handleUpdateDirection,
       project,
+      selectedRelationshipId,
     ],
   );
 
@@ -389,12 +481,15 @@ function App() {
         edgeTypes={edgeTypes}
         onConnect={handleConnect}
         isValidConnection={isValidConnection}
+        onEdgesDelete={handleEdgesDelete}
+        onEdgeClick={handleEdgeClick}
+        onPaneClick={handlePaneClick}
         fitView
         nodesDraggable={false}
         nodesConnectable
         elementsSelectable
         edgesReconnectable={false}
-        deleteKeyCode={null}
+        deleteKeyCode={["Backspace", "Delete"]}
       >
         <Panel position="top-left" className="canvas-toolbar">
           <button
