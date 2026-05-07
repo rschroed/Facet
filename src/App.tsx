@@ -4,6 +4,7 @@ import {
   Controls,
   Panel,
   ReactFlow,
+  type Connection,
   type EdgeTypes,
   type NodeTypes,
 } from "@xyflow/react";
@@ -19,6 +20,7 @@ import type {
   DirectionArtifact,
   DirectionSet,
   DirectionSetId,
+  FacetsProject,
   FacetsRelationship,
 } from "./domain";
 import { staticProjectFile } from "./fixtures/staticProject";
@@ -46,6 +48,49 @@ const nodeTypes = {
 const edgeTypes = {
   relationship: RelationshipEdge,
 } satisfies EdgeTypes;
+
+function isBriefArtifactId(
+  project: FacetsProject,
+  artifactId: string | null,
+): artifactId is ArtifactId {
+  return project.canvas.artifacts.some(
+    (artifact) => artifact.id === artifactId && artifact.type === "brief",
+  );
+}
+
+function isDirectionSetId(
+  project: FacetsProject,
+  directionSetId: string | null,
+): directionSetId is DirectionSetId {
+  return project.canvas.directionSets.some(
+    (directionSet) => directionSet.id === directionSetId,
+  );
+}
+
+function hasBriefToDirectionSetRelationship(
+  project: FacetsProject,
+  sourceBriefId: ArtifactId,
+  targetDirectionSetId: DirectionSetId,
+): boolean {
+  return project.canvas.relationships.some(
+    (relationship) =>
+      relationship.type === "brief_to_direction_set" &&
+      relationship.sourceId === sourceBriefId &&
+      relationship.targetId === targetDirectionSetId,
+  );
+}
+
+function canConnectBriefToDirectionSet(
+  project: FacetsProject,
+  sourceId: string | null,
+  targetId: string | null,
+): boolean {
+  return (
+    isBriefArtifactId(project, sourceId) &&
+    isDirectionSetId(project, targetId) &&
+    !hasBriefToDirectionSetRelationship(project, sourceId, targetId)
+  );
+}
 
 function App() {
   const [project, setProject] = useState(staticProjectFile.project);
@@ -251,6 +296,70 @@ function App() {
     });
   }, [canvasView, project]);
 
+  const handleConnectBriefToDirectionSet = useCallback(
+    (sourceBriefId: ArtifactId, targetDirectionSetId: DirectionSetId) => {
+      setProject((currentProject) => {
+        if (
+          !canConnectBriefToDirectionSet(
+            currentProject,
+            sourceBriefId,
+            targetDirectionSetId,
+          )
+        ) {
+          return currentProject;
+        }
+
+        const relationship: FacetsRelationship = {
+          id: `relationship-${sourceBriefId}-${targetDirectionSetId}`,
+          type: "brief_to_direction_set",
+          sourceId: sourceBriefId,
+          targetId: targetDirectionSetId,
+        };
+
+        return {
+          ...currentProject,
+          canvas: {
+            ...currentProject.canvas,
+            relationships: [
+              ...currentProject.canvas.relationships,
+              relationship,
+            ],
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      if (
+        !canConnectBriefToDirectionSet(
+          project,
+          connection.source,
+          connection.target,
+        ) ||
+        !connection.source ||
+        !connection.target
+      ) {
+        return;
+      }
+
+      handleConnectBriefToDirectionSet(connection.source, connection.target);
+    },
+    [handleConnectBriefToDirectionSet, project],
+  );
+
+  const isValidConnection = useCallback(
+    (connection: { source?: string | null; target?: string | null }) =>
+      canConnectBriefToDirectionSet(
+        project,
+        connection.source ?? null,
+        connection.target ?? null,
+      ),
+    [project],
+  );
+
   const staticGraph = useMemo(
     () =>
       mapProjectFileToReactFlow(staticProjectFile, {
@@ -278,9 +387,11 @@ function App() {
         edges={staticGraph.edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onConnect={handleConnect}
+        isValidConnection={isValidConnection}
         fitView
         nodesDraggable={false}
-        nodesConnectable={false}
+        nodesConnectable
         elementsSelectable
         edgesReconnectable={false}
         deleteKeyCode={null}

@@ -22,6 +22,7 @@ export type ArtifactNodeData = {
   typeLabel: string;
   summary: string;
   expanded: boolean;
+  canStartConnection: boolean;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
   onUpdateDirection?: (
@@ -36,6 +37,7 @@ export type DirectionGroupNodeData = {
   directionSet: DirectionSet;
   count: number;
   canGenerate: boolean;
+  canAcceptConnection: boolean;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
 };
 

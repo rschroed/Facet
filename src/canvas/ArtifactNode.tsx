@@ -35,7 +35,11 @@ function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
         </button>
       </header>
       <ArtifactNodeBody data={data} />
-      <Handle type="source" position={Position.Right} isConnectable={false} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        isConnectable={data.canStartConnection}
+      />
     </article>
   );
 }
