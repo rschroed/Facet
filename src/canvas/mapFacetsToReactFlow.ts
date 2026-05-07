@@ -13,6 +13,7 @@ import type {
   ArtifactNode,
   ArtifactNodeData,
   BriefArtifactPatch,
+  DirectionArtifactPatch,
   DirectionGroupNode,
   FacetsCanvasNode,
   RelationshipEdge,
@@ -32,6 +33,10 @@ export type MapProjectFileToReactFlowOptions = {
   canvasView?: FacetsCanvasView;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
 };
 
@@ -63,6 +68,7 @@ export function mapProjectFileToReactFlow(
           directionSetByDirectionId.get(artifact.id),
           options.onToggleExpanded,
           options.onUpdateBrief,
+          options.onUpdateDirection,
         ),
       ),
     ],
@@ -109,6 +115,10 @@ function mapArtifactToNode(
   parentDirectionSetId: DirectionSetId | undefined,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void,
 ): ArtifactNode {
   const nodeView = canvasView.nodes[artifact.id];
 
@@ -123,6 +133,7 @@ function mapArtifactToNode(
       Boolean(nodeView.expanded),
       onToggleExpanded,
       onUpdateBrief,
+      onUpdateDirection,
     ),
     draggable: false,
     selectable: false,
@@ -177,6 +188,10 @@ function getArtifactNodeData(
   expanded: boolean,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
+  onUpdateDirection?: (
+    artifactId: ArtifactId,
+    patch: DirectionArtifactPatch,
+  ) => void,
 ): ArtifactNodeData {
   switch (artifact.type) {
     case "brief":
@@ -195,6 +210,7 @@ function getArtifactNodeData(
         summary: artifact.angle,
         expanded,
         onToggleExpanded,
+        onUpdateDirection,
       };
     case "prompt":
       return {

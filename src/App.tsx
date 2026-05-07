@@ -12,7 +12,7 @@ import ArtifactNode from "./canvas/ArtifactNode";
 import DirectionGroupNode from "./canvas/DirectionGroupNode";
 import { mapProjectFileToReactFlow } from "./canvas/mapFacetsToReactFlow";
 import RelationshipEdge from "./canvas/RelationshipEdge";
-import type { BriefArtifactPatch } from "./canvas/types";
+import type { BriefArtifactPatch, DirectionArtifactPatch } from "./canvas/types";
 import type {
   ArtifactId,
   BriefArtifact,
@@ -76,6 +76,23 @@ function App() {
           ...currentProject.canvas,
           artifacts: currentProject.canvas.artifacts.map((artifact) =>
             artifact.id === artifactId && artifact.type === "brief"
+              ? { ...artifact, ...patch }
+              : artifact,
+          ),
+        },
+      }));
+    },
+    [],
+  );
+
+  const handleUpdateDirection = useCallback(
+    (artifactId: ArtifactId, patch: DirectionArtifactPatch) => {
+      setProject((currentProject) => ({
+        ...currentProject,
+        canvas: {
+          ...currentProject.canvas,
+          artifacts: currentProject.canvas.artifacts.map((artifact) =>
+            artifact.id === artifactId && artifact.type === "direction"
               ? { ...artifact, ...patch }
               : artifact,
           ),
@@ -241,6 +258,7 @@ function App() {
         canvasView,
         onToggleExpanded: handleToggleExpanded,
         onUpdateBrief: handleUpdateBrief,
+        onUpdateDirection: handleUpdateDirection,
         onGenerateDirections: handleGenerateDirections,
       }),
     [
@@ -248,6 +266,7 @@ function App() {
       handleGenerateDirections,
       handleToggleExpanded,
       handleUpdateBrief,
+      handleUpdateDirection,
       project,
     ],
   );
