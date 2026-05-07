@@ -52,6 +52,7 @@ export function mapProjectFileToReactFlow(
           directionSet,
           canvasView,
           getDirectionCount(directionSet.id, project.canvas.relationships),
+          isDirectionSetConnected(directionSet.id, project.canvas.relationships),
           options.onGenerateDirections,
         ),
       ),
@@ -75,6 +76,7 @@ function mapDirectionSetToNode(
   directionSet: DirectionSet,
   canvasView: FacetsCanvasView,
   directionCount: number,
+  canGenerate: boolean,
   onGenerateDirections?: (directionSetId: DirectionSetId) => void,
 ): DirectionGroupNode {
   const nodeView = canvasView.nodes[directionSet.id];
@@ -86,6 +88,7 @@ function mapDirectionSetToNode(
     data: {
       directionSet,
       count: directionCount,
+      canGenerate,
       onGenerateDirections,
     },
     draggable: false,
@@ -156,6 +159,17 @@ function getDirectionCount(
       relationship.type === "contains_direction" &&
       relationship.sourceId === directionSetId,
   ).length;
+}
+
+function isDirectionSetConnected(
+  directionSetId: DirectionSetId,
+  relationships: FacetsRelationship[],
+): boolean {
+  return relationships.some(
+    (relationship) =>
+      relationship.type === "brief_to_direction_set" &&
+      relationship.targetId === directionSetId,
+  );
 }
 
 function getArtifactNodeData(

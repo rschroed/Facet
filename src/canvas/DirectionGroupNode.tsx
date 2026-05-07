@@ -3,10 +3,18 @@ import type { MouseEvent } from "react";
 import type { DirectionGroupNode as DirectionGroupNodeType } from "./types";
 
 function DirectionGroupNode({ data }: NodeProps<DirectionGroupNodeType>) {
-  const buttonLabel = data.count === 0 ? "Generate directions" : "Generate more";
+  const buttonLabel = !data.canGenerate
+    ? "Connect brief to generate"
+    : data.count === 0
+      ? "Generate directions"
+      : "Generate more";
 
   function handleGenerateClick(event: MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
+    if (!data.canGenerate) {
+      return;
+    }
+
     data.onGenerateDirections?.(data.directionSet.id);
   }
 
@@ -21,6 +29,7 @@ function DirectionGroupNode({ data }: NodeProps<DirectionGroupNodeType>) {
         <button
           className="direction-group-node__action nodrag nopan"
           type="button"
+          disabled={!data.canGenerate}
           onClick={handleGenerateClick}
         >
           {buttonLabel}

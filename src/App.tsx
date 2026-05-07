@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   Background,
   Controls,
+  Panel,
   ReactFlow,
   type EdgeTypes,
   type NodeTypes,
@@ -16,6 +17,7 @@ import type {
   ArtifactId,
   BriefArtifact,
   DirectionArtifact,
+  DirectionSet,
   DirectionSetId,
   FacetsRelationship,
 } from "./domain";
@@ -28,7 +30,13 @@ const GENERATED_DIRECTION_START_Y = 64;
 const GENERATED_DIRECTION_Y_GAP = 260;
 const GENERATED_DIRECTION_WIDTH = 340;
 const GENERATED_DIRECTION_HEIGHT = 220;
+const DIRECTION_SET_X = 420;
+const DIRECTION_SET_WIDTH = 380;
+const DIRECTION_SET_BASE_HEIGHT = 48;
+const DIRECTION_SET_ROW_HEIGHT = 260;
+const DIRECTION_SET_Y_GAP = 80;
 const generatedDirectionIdPattern = /^direction-generated-(\d+)$/;
+const generatedDirectionSetIdPattern = /^direction-set-generated-(\d+)$/;
 
 const nodeTypes = {
   artifact: ArtifactNode,
@@ -174,6 +182,58 @@ function App() {
     [canvasView, project],
   );
 
+  const handleCreateDirectionSet = useCallback(() => {
+    const existingGeneratedSetCount = project.canvas.directionSets.filter(
+      (directionSet) => generatedDirectionSetIdPattern.test(directionSet.id),
+    ).length;
+    const directionSetNumber = project.canvas.directionSets.length + 1;
+    const directionSet: DirectionSet = {
+      id: `direction-set-generated-${existingGeneratedSetCount + 1}`,
+      title: `Direction Set ${directionSetNumber}`,
+    };
+    const nextY =
+      project.canvas.directionSets.length === 0
+        ? 0
+        : Math.max(
+            ...project.canvas.directionSets.map((existingDirectionSet) => {
+              const nodeView = canvasView.nodes[existingDirectionSet.id];
+              const directionCount = project.canvas.relationships.filter(
+                (relationship) =>
+                  relationship.type === "contains_direction" &&
+                  relationship.sourceId === existingDirectionSet.id,
+              ).length;
+              const groupHeight =
+                DIRECTION_SET_BASE_HEIGHT +
+                Math.max(directionCount, 1) * DIRECTION_SET_ROW_HEIGHT;
+
+              return nodeView.position.y + groupHeight;
+            }),
+          ) + DIRECTION_SET_Y_GAP;
+
+    setProject({
+      ...project,
+      canvas: {
+        ...project.canvas,
+        directionSets: [...project.canvas.directionSets, directionSet],
+      },
+    });
+    setCanvasView({
+      ...canvasView,
+      nodes: {
+        ...canvasView.nodes,
+        [directionSet.id]: {
+          position: { x: DIRECTION_SET_X, y: nextY },
+          size: {
+            width: DIRECTION_SET_WIDTH,
+            height:
+              DIRECTION_SET_BASE_HEIGHT +
+              DIRECTION_SET_ROW_HEIGHT,
+          },
+        },
+      },
+    });
+  }, [canvasView, project]);
+
   const staticGraph = useMemo(
     () =>
       mapProjectFileToReactFlow(staticProjectFile, {
@@ -206,6 +266,15 @@ function App() {
         edgesReconnectable={false}
         deleteKeyCode={null}
       >
+        <Panel position="top-left" className="canvas-toolbar">
+          <button
+            className="canvas-toolbar__button nodrag nopan"
+            type="button"
+            onClick={handleCreateDirectionSet}
+          >
+            New direction set
+          </button>
+        </Panel>
         <Background />
         <Controls />
       </ReactFlow>
