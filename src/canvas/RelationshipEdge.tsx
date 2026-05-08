@@ -1,5 +1,6 @@
 import {
   BaseEdge,
+  EdgeLabelRenderer,
   getSmoothStepPath,
   type EdgeProps,
 } from "@xyflow/react";
@@ -14,8 +15,9 @@ function RelationshipEdge({
   sourcePosition,
   targetPosition,
   label,
+  selected,
 }: EdgeProps<RelationshipEdgeType>) {
-  const [edgePath] = getSmoothStepPath({
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -24,7 +26,35 @@ function RelationshipEdge({
     targetPosition,
   });
 
-  return <BaseEdge id={id} path={edgePath} label={label} />;
+  return (
+    <>
+      {selected ? (
+        <path className="relationship-edge__selection-halo" d={edgePath} />
+      ) : null}
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        label={label}
+        className={
+          selected
+            ? "relationship-edge relationship-edge--selected"
+            : "relationship-edge"
+        }
+      />
+      {selected ? (
+        <EdgeLabelRenderer>
+          <div
+            className="relationship-edge__selection-label"
+            style={{
+              transform: `translate(8px, -50%) translate(${labelX}px, ${labelY}px)`,
+            }}
+          >
+            Selected · Delete
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
+    </>
+  );
 }
 
 export default RelationshipEdge;

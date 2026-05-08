@@ -41,6 +41,7 @@ export type MapProjectFileToReactFlowOptions = {
     patch: DirectionArtifactPatch,
   ) => void;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
+  selectedRelationshipId?: string | null;
 };
 
 export function mapProjectFileToReactFlow(
@@ -85,7 +86,9 @@ export function mapProjectFileToReactFlow(
     ],
     edges: project.canvas.relationships
       .filter((relationship) => relationship.type !== "contains_direction")
-      .map(mapRelationshipToEdge),
+      .map((relationship) =>
+        mapRelationshipToEdge(relationship, options.selectedRelationshipId),
+      ),
   };
 }
 
@@ -316,6 +319,7 @@ function getArtifactNodeData(
 
 function mapRelationshipToEdge(
   relationship: FacetsRelationship,
+  selectedRelationshipId: string | null | undefined,
 ): RelationshipEdge {
   return {
     id: relationship.id,
@@ -324,7 +328,8 @@ function mapRelationshipToEdge(
     target: relationship.targetId,
     label: getRelationshipLabel(relationship),
     data: { relationship },
-    selectable: false,
+    selectable: relationship.type === "brief_to_direction_set",
+    selected: relationship.id === selectedRelationshipId,
     reconnectable: false,
   };
 }

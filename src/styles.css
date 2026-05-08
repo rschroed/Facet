@@ -49,6 +49,36 @@ body {
   stroke-width: 1.6;
 }
 
+.relationship-edge--selected .react-flow__edge-path {
+  stroke: #1f7c60;
+  stroke-width: 3;
+}
+
+.relationship-edge__selection-halo {
+  fill: none;
+  stroke: rgba(31, 124, 96, 0.18);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 12;
+  pointer-events: none;
+}
+
+.relationship-edge__selection-label {
+  position: absolute;
+  z-index: 20;
+  padding: 5px 8px;
+  color: #fffdf7;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  white-space: nowrap;
+  background: #1f7c60;
+  border: 1px solid rgba(31, 35, 32, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(54, 48, 36, 0.16);
+  pointer-events: none;
+}
+
 .react-flow__edge-textbg {
   fill: #f6f2e8;
 }
