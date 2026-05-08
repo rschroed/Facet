@@ -132,9 +132,34 @@ body {
   background: #176b52;
 }
 
+.canvas-toolbar__button:disabled,
+.canvas-toolbar__button:disabled:hover {
+  color: #6d6a61;
+  background: #f2eee3;
+  border-color: rgba(31, 35, 32, 0.12);
+  cursor: default;
+}
+
+.canvas-toolbar__button--secondary {
+  color: #1f211d;
+  background: #fffdf7;
+}
+
+.canvas-toolbar__button--secondary:hover {
+  background: #eee8d9;
+}
+
 .canvas-toolbar__button:focus-visible {
   outline: 3px solid rgba(31, 124, 96, 0.24);
   outline-offset: 2px;
+}
+
+.canvas-toolbar__status {
+  color: #5f594f;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .direction-group-node {
@@ -237,6 +262,13 @@ body {
   border-color: rgba(88, 99, 131, 0.3);
 }
 
+.artifact-node--direction.artifact-node--selected {
+  border-color: rgba(31, 124, 96, 0.64);
+  box-shadow:
+    0 0 0 4px rgba(31, 124, 96, 0.12),
+    0 18px 48px rgba(54, 48, 36, 0.12);
+}
+
 .artifact-node--prompt {
   border-color: rgba(146, 94, 55, 0.3);
 }
@@ -248,6 +280,12 @@ body {
   gap: 12px;
   min-height: 28px;
   margin-bottom: 14px;
+}
+
+.artifact-node__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .artifact-node__eyebrow {
@@ -372,6 +410,13 @@ body {
 
 .artifact-node__action:hover {
   background: #eee8d9;
+}
+
+.artifact-node__action--selected,
+.artifact-node__action--selected:hover {
+  color: #fffdf7;
+  background: #1f7c60;
+  border-color: rgba(31, 124, 96, 0.5);
 }
 
 .artifact-node__action:focus-visible {

@@ -9,10 +9,17 @@ import type {
 
 function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
   const toggleLabel = data.expanded ? "Collapse" : "Expand";
+  const canSelectDirection = data.artifact.type === "direction";
+  const selectionLabel = data.selected ? "Selected" : "Select";
 
   function handleToggleClick(event: MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
     data.onToggleExpanded?.(data.artifact.id);
+  }
+
+  function handleSelectClick(event: MouseEvent<HTMLButtonElement>) {
+    event.stopPropagation();
+    data.onToggleDirectionSelected?.(data.artifact.id);
   }
 
   return (
@@ -21,18 +28,37 @@ function ArtifactNode({ data }: NodeProps<ArtifactNodeType>) {
         "artifact-node",
         `artifact-node--${data.artifact.type}`,
         data.expanded ? "artifact-node--expanded" : "artifact-node--collapsed",
+        data.selected ? "artifact-node--selected" : "",
       ].join(" ")}
     >
       <Handle type="target" position={Position.Left} isConnectable={false} />
       <header className="artifact-node__header">
         <div className="artifact-node__eyebrow">{data.typeLabel}</div>
-        <button
-          className="artifact-node__action nodrag nopan"
-          type="button"
-          onClick={handleToggleClick}
-        >
-          {toggleLabel}
-        </button>
+        <div className="artifact-node__actions">
+          {canSelectDirection ? (
+            <button
+              className={[
+                "artifact-node__action",
+                "artifact-node__action--select",
+                data.selected ? "artifact-node__action--selected" : "",
+                "nodrag",
+                "nopan",
+              ].join(" ")}
+              type="button"
+              aria-pressed={data.selected}
+              onClick={handleSelectClick}
+            >
+              {selectionLabel}
+            </button>
+          ) : null}
+          <button
+            className="artifact-node__action nodrag nopan"
+            type="button"
+            onClick={handleToggleClick}
+          >
+            {toggleLabel}
+          </button>
+        </div>
       </header>
       <ArtifactNodeBody data={data} />
       <Handle
