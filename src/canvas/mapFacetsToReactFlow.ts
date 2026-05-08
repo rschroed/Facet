@@ -40,6 +40,8 @@ export type MapProjectFileToReactFlowOptions = {
     artifactId: ArtifactId,
     patch: DirectionArtifactPatch,
   ) => void;
+  selectedDirectionIds?: ReadonlySet<ArtifactId>;
+  onToggleDirectionSelected?: (artifactId: ArtifactId) => void;
   onGenerateDirections?: (directionSetId: DirectionSetId) => void;
   selectedRelationshipId?: string | null;
 };
@@ -79,6 +81,8 @@ export function mapProjectFileToReactFlow(
           directionSetByDirectionId.get(artifact.id),
           directionSetLayout.childPositions.get(artifact.id),
           options.onToggleExpanded,
+          options.selectedDirectionIds,
+          options.onToggleDirectionSelected,
           options.onUpdateBrief,
           options.onUpdateDirection,
         ),
@@ -138,6 +142,8 @@ function mapArtifactToNode(
       }
     | undefined,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
+  selectedDirectionIds?: ReadonlySet<ArtifactId>,
+  onToggleDirectionSelected?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
   onUpdateDirection?: (
     artifactId: ArtifactId,
@@ -155,7 +161,9 @@ function mapArtifactToNode(
     data: getArtifactNodeData(
       artifact,
       Boolean(nodeView.expanded),
+      selectedDirectionIds?.has(artifact.id) ?? false,
       onToggleExpanded,
+      onToggleDirectionSelected,
       onUpdateBrief,
       onUpdateDirection,
     ),
@@ -277,7 +285,9 @@ function isDirectionSetConnected(
 function getArtifactNodeData(
   artifact: FacetsArtifact,
   expanded: boolean,
+  selected: boolean,
   onToggleExpanded?: (artifactId: ArtifactId) => void,
+  onToggleDirectionSelected?: (artifactId: ArtifactId) => void,
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void,
   onUpdateDirection?: (
     artifactId: ArtifactId,
@@ -291,6 +301,7 @@ function getArtifactNodeData(
         typeLabel: "Brief",
         summary: artifact.brief,
         expanded,
+        selected: false,
         canStartConnection: true,
         onToggleExpanded,
         onUpdateBrief,
@@ -301,8 +312,10 @@ function getArtifactNodeData(
         typeLabel: "Direction",
         summary: artifact.angle,
         expanded,
+        selected,
         canStartConnection: false,
         onToggleExpanded,
+        onToggleDirectionSelected,
         onUpdateDirection,
       };
     case "prompt":
@@ -311,6 +324,7 @@ function getArtifactNodeData(
         typeLabel: "Prompt",
         summary: artifact.summary,
         expanded,
+        selected: false,
         canStartConnection: false,
         onToggleExpanded,
       };

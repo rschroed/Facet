@@ -22,8 +22,10 @@ export type ArtifactNodeData = {
   typeLabel: string;
   summary: string;
   expanded: boolean;
+  selected: boolean;
   canStartConnection: boolean;
   onToggleExpanded?: (artifactId: ArtifactId) => void;
+  onToggleDirectionSelected?: (artifactId: ArtifactId) => void;
   onUpdateBrief?: (artifactId: ArtifactId, patch: BriefArtifactPatch) => void;
   onUpdateDirection?: (
     artifactId: ArtifactId,

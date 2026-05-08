@@ -105,6 +105,9 @@ function canConnectBriefToDirectionSet(
 function App() {
   const [project, setProject] = useState(staticProjectFile.project);
   const [canvasView, setCanvasView] = useState(staticProjectFile.canvasView);
+  const [selectedDirectionIds, setSelectedDirectionIds] = useState<
+    Set<ArtifactId>
+  >(() => new Set());
   const [selectedRelationshipId, setSelectedRelationshipId] = useState<
     string | null
   >(null);
@@ -159,6 +162,35 @@ function App() {
     },
     [],
   );
+
+  const handleToggleDirectionSelected = useCallback(
+    (artifactId: ArtifactId) => {
+      const isDirection = project.canvas.artifacts.some(
+        (artifact) => artifact.id === artifactId && artifact.type === "direction",
+      );
+
+      if (!isDirection) {
+        return;
+      }
+
+      setSelectedDirectionIds((currentSelectedDirectionIds) => {
+        const nextSelectedDirectionIds = new Set(currentSelectedDirectionIds);
+
+        if (nextSelectedDirectionIds.has(artifactId)) {
+          nextSelectedDirectionIds.delete(artifactId);
+        } else {
+          nextSelectedDirectionIds.add(artifactId);
+        }
+
+        return nextSelectedDirectionIds;
+      });
+    },
+    [project],
+  );
+
+  const handleClearDirectionSelection = useCallback(() => {
+    setSelectedDirectionIds(new Set());
+  }, []);
 
   const handleGenerateDirections = useCallback(
     (directionSetId: DirectionSetId) => {
@@ -458,6 +490,8 @@ function App() {
         onToggleExpanded: handleToggleExpanded,
         onUpdateBrief: handleUpdateBrief,
         onUpdateDirection: handleUpdateDirection,
+        selectedDirectionIds,
+        onToggleDirectionSelected: handleToggleDirectionSelected,
         onGenerateDirections: handleGenerateDirections,
         selectedRelationshipId,
       }),
@@ -467,10 +501,18 @@ function App() {
       handleToggleExpanded,
       handleUpdateBrief,
       handleUpdateDirection,
+      handleToggleDirectionSelected,
       project,
+      selectedDirectionIds,
       selectedRelationshipId,
     ],
   );
+
+  const selectedDirectionCount = selectedDirectionIds.size;
+  const selectedDirectionCountLabel =
+    selectedDirectionCount === 1
+      ? "1 direction selected"
+      : `${selectedDirectionCount} directions selected`;
 
   return (
     <main className="app-shell" aria-label="Facets canvas">
@@ -498,6 +540,17 @@ function App() {
             onClick={handleCreateDirectionSet}
           >
             New direction set
+          </button>
+          <span className="canvas-toolbar__status">
+            {selectedDirectionCountLabel}
+          </span>
+          <button
+            className="canvas-toolbar__button canvas-toolbar__button--secondary nodrag nopan"
+            type="button"
+            disabled={selectedDirectionCount === 0}
+            onClick={handleClearDirectionSelection}
+          >
+            Clear selection
           </button>
         </Panel>
         <Background />
